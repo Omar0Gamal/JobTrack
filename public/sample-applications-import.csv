@@ -1,0 +1,6 @@
+Company,Role,Status,Priority,Location Type,Location,Salary Min,Salary Max,Currency,Source,Job URL,Applied Date,Follow Up Date
+Anthropic,Staff Research Engineer,APPLIED,HIGH,REMOTE,San Francisco CA,280000,340000,USD,COMPANY_SITE,https://jobs.lever.co/anthropic/12345,2026-09-15,2026-10-25
+Temporal,Senior Solutions Architect,INTERVIEW,HIGH,REMOTE,Remote US,210000,250000,USD,REFERRAL,https://boards.greenhouse.io/temporal/jobs/67890,2026-09-20,2026-10-22
+Supabase,Developer Advocate,PHONE_SCREEN,MEDIUM,REMOTE,Global,160000,195000,USD,LINKEDIN,https://supabase.com/careers/dev-advocate,2026-10-01,2026-10-20
+Turso,Systems Engineer (Databases),WISHLIST,MEDIUM,HYBRID,New York NY,180000,220000,USD,OTHER,https://jobs.ashbyhq.com/turso/systems-eng,2026-10-10,
+Modal,Platform Infrastructure Engineer,OFFER,HIGH,REMOTE,San Francisco CA,230000,270000,USD,COMPANY_SITE,https://modal.com/careers/platform-infra,2026-08-28,
