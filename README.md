@@ -5,15 +5,17 @@
 **A production-grade Job Application Tracker & Career Pipeline Command Center.**  
 Engineered for private daily use and zero-signup portfolio evaluation from a single codebase.
 
-[![CI Status](https://github.com/omarg/JobTrack/actions/workflows/ci.yml/badge.svg)](https://github.com/omarg/JobTrack/actions/workflows/ci.yml)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-jobtrack--wheat.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://jobtrack-wheat.vercel.app)
+
+[![CI Status](https://github.com/Omar0Gamal/JobTrack/actions/workflows/ci.yml/badge.svg)](https://github.com/Omar0Gamal/JobTrack/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7_Strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.2_App_Router-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5_App_Router-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_%2F_Neon-4169E1?logo=postgresql&logoColor=white)](https://neon.tech/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.4-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Tests](https://img.shields.io/badge/Tests-207_Vitest_%2B_5_Playwright-10B981?logo=vitest&logoColor=white)](#testing--quality-gates)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B.svg)](LICENSE)
 
-[**Features**](#key-features) · [**Screenshots**](#product-tour) · [**Quickstart**](#local-development) · [**Deployment**](#deployment) · [**Architecture & Security**](ARCHITECTURE.md)
+[**Live Demo**](https://jobtrack-wheat.vercel.app) · [**Features**](#key-features) · [**Screenshots**](#product-tour) · [**Quickstart**](#local-development) · [**Deployment**](#deployment) · [**Architecture & Security**](ARCHITECTURE.md)
 
 </div>
 

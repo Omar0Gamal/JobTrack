@@ -8,6 +8,8 @@ import { BackupReminderBanner } from "@/components/layout/backup-reminder-banner
 import { CommandPalette } from "@/components/layout/command-palette";
 import { ShortcutsController } from "@/components/layout/shortcuts-controller";
 
+export const dynamic = "force-dynamic";
+
 export default async function AppShellLayout({
   children,
 }: {
