@@ -130,12 +130,12 @@ export default async function LandingPage(props: LandingPageProps) {
                 className="w-full sm:w-auto gap-2 border-border text-base"
               >
                 <Link
-                  href="https://github.com"
+                  href="https://github.com/Omar0Gamal/JobTrack"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  <span>View GitHub Spec</span>
+                  <span>View GitHub Repository</span>
                 </Link>
               </Button>
             </div>
