@@ -9,7 +9,7 @@ Engineered for private daily use and zero-signup portfolio evaluation from a sin
 
 [![CI Status](https://github.com/Omar0Gamal/JobTrack/actions/workflows/ci.yml/badge.svg)](https://github.com/Omar0Gamal/JobTrack/actions/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7_Strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5_App_Router-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15_App_Router-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16_%2F_Neon-4169E1?logo=postgresql&logoColor=white)](https://neon.tech/)
 [![Prisma](https://img.shields.io/badge/Prisma-6.4-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
 [![Tests](https://img.shields.io/badge/Tests-207_Vitest_%2B_5_Playwright-10B981?logo=vitest&logoColor=white)](#testing--quality-gates)
@@ -116,7 +116,7 @@ Tracking a modern engineering job search in a spreadsheet breaks down once you a
 
 | Category | Technology |
 | :--- | :--- |
-| **Framework & Language** | Next.js 15.2 (App Router, Server Actions), React 19, TypeScript 5.7 (`strict: true`, `noUncheckedIndexedAccess: true`) |
+| **Framework & Language** | Next.js 15 (App Router, Server Actions), React 19, TypeScript 5.7 (`strict: true`, `noUncheckedIndexedAccess: true`) |
 | **Database & ORM** | PostgreSQL 16 (Neon Serverless in prod, Docker Alpine locally), Prisma ORM 6.4 |
 | **Authentication** | Auth.js v5 (`next-auth` + `@auth/prisma-adapter`) for Personal Mode; HMAC-SHA256 signed cookies for Demo Mode |
 | **UI & Styling** | Tailwind CSS 3.4, `shadcn/ui`, `lucide-react`, `next-themes`, `cmdk`, `sonner` |
@@ -134,7 +134,7 @@ Tracking a modern engineering job search in a spreadsheet breaks down once you a
 
 ### 2. Clone, Install & Start Database
 ```bash
-git clone https://github.com/omarg/JobTrack.git
+git clone https://github.com/Omar0Gamal/JobTrack.git
 cd JobTrack
 pnpm install
 
