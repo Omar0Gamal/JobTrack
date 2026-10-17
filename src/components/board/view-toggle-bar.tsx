@@ -351,7 +351,7 @@ export function ViewToggleBar({
               type="date"
               value={effectiveParams.from}
               onChange={(e) => handleFilterUpdate({ from: e.target.value })}
-              className="h-8 w-[125px] text-xs px-2"
+              className="h-8 w-[145px] text-xs px-2 cursor-pointer"
               title="Applied from date"
               aria-label="Applied from date"
             />
@@ -362,7 +362,7 @@ export function ViewToggleBar({
               type="date"
               value={effectiveParams.to}
               onChange={(e) => handleFilterUpdate({ to: e.target.value })}
-              className="h-8 w-[125px] text-xs px-2"
+              className="h-8 w-[145px] text-xs px-2 cursor-pointer"
               title="Applied to date"
               aria-label="Applied to date"
             />
