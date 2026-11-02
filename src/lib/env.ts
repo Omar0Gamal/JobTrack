@@ -10,6 +10,8 @@ export const EnvSchema = z.object({
   AUTH_SECRET: z.string().optional(),
   ALLOWED_EMAILS: z.string().optional(),
   CRON_SECRET: z.string().optional(),
+  AGENT_API_KEY: z.string().optional(),
+  AGENT_USER_EMAIL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -59,6 +61,20 @@ export function getAllowedEmails(): string[] {
 export function getCronSecret(): string | undefined {
   const secret = process.env.CRON_SECRET?.trim();
   return secret && secret.length > 0 ? secret : undefined;
+}
+
+export function getAgentApiKey(): string | undefined {
+  const key = process.env.AGENT_API_KEY?.trim();
+  return key && key.length > 0 ? key : undefined;
+}
+
+export function getAgentUserEmail(): string | undefined {
+  const explicit = process.env.AGENT_USER_EMAIL?.trim().toLowerCase();
+  if (explicit && explicit.length > 0) {
+    return explicit;
+  }
+  const allowed = getAllowedEmails();
+  return allowed[0];
 }
 
 export function getDatabaseUrl(): string {

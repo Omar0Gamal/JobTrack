@@ -1,8 +1,9 @@
 import { requireUser } from "@/server/auth/require-user";
-import { isDemoMode } from "@/lib/env";
+import { isDemoMode, getAgentApiKey } from "@/lib/env";
 import { Badge } from "@/components/ui/badge";
 import { GeneralSettingsCard } from "@/components/settings/general-settings-card";
 import { ResumeVersionsManager } from "@/components/settings/resume-versions-manager";
+import { AgentIntegrationCard } from "@/components/settings/agent-integration-card";
 import { DataPortabilityCard } from "@/components/settings/data-portability-card";
 import { DangerZoneCard } from "@/components/settings/danger-zone-card";
 import { getResumeVersionsAction } from "@/server/actions/resume.actions";
@@ -13,6 +14,7 @@ export default async function SettingsPage() {
     getResumeVersionsAction(),
   ]);
   const isDemo = isDemoMode();
+  const isAgentConfigured = Boolean(getAgentApiKey());
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -50,6 +52,9 @@ export default async function SettingsPage() {
 
         {/* Resume Versions Management */}
         <ResumeVersionsManager initialResumes={resumes} />
+
+        {/* Autonomous Agent & MCP Integration */}
+        <AgentIntegrationCard isConfigured={isAgentConfigured} />
 
         {/* Data Portability (CSV Export/Import Wizard & JSON Backup) */}
         <DataPortabilityCard user={user} />
