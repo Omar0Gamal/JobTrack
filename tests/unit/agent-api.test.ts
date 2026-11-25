@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { requireAgent } from "@/server/auth/require-agent";
 import { GET as getApplications, POST as postApplication } from "@/app/api/agent/applications/route";
 import { GET as getApplicationById, PATCH as patchApplicationById } from "@/app/api/agent/applications/[id]/route";
+import { PATCH as patchApplicationsBatch } from "@/app/api/agent/applications/batch/route";
 import { GET as getStats } from "@/app/api/agent/stats/route";
 import { GET as getResumes, POST as postResumes } from "@/app/api/agent/resumes/route";
 
@@ -95,6 +96,9 @@ vi.mock("@/server/db/prisma", () => {
           if (w.archivedAt === null) results = results.filter((a) => a.archivedAt === null);
           if (w.status) results = results.filter((a) => a.status === w.status);
         }
+        const skip = typeof args?.skip === "number" ? Math.max(0, args.skip) : 0;
+        const take = typeof args?.take === "number" ? Math.max(0, args.take) : results.length;
+        results = results.slice(skip, skip + take);
         return results.map((app) => ({
           ...app,
           resumeVersion: mockDb.resumeVersions.find((r) => r.id === app.resumeVersionId) || null,
@@ -648,6 +652,112 @@ describe("Agent API & requireAgent Token Verification", () => {
       // Overdue list should only contain active non-rejected/non-offer application
       expect(json.overdueFollowUps).toHaveLength(1);
       expect(json.overdueFollowUps[0].id).toBe("app_1");
+    });
+
+    it("compact=true caps overdueFollowUps, sets overdueFollowUpsTotal, and omits duplicate data envelope", async () => {
+      const now = new Date();
+      const pastFollowUp = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+      mockDb.applications.push(
+        {
+          id: "app_c1",
+          userId: TEST_USER.id,
+          company: "Co One",
+          role: "Backend Engineer",
+          status: "APPLIED",
+          appliedDate: now,
+          createdAt: now,
+          followUpDate: pastFollowUp,
+          deletedAt: null,
+          archivedAt: null,
+        },
+        {
+          id: "app_c2",
+          userId: TEST_USER.id,
+          company: "Co Two",
+          role: "Go Engineer",
+          status: "APPLIED",
+          appliedDate: now,
+          createdAt: now,
+          followUpDate: pastFollowUp,
+          deletedAt: null,
+          archivedAt: null,
+        }
+      );
+
+      const req = createNextRequest("/api/agent/stats?compact=true&followUpLimit=1", {
+        headers: authHeaders,
+      });
+      const res = await getStats(req);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      expect(json.compact).toBe(true);
+      expect(json.overdueFollowUpsTotal).toBe(2);
+      expect(json.overdueFollowUps).toHaveLength(1);
+      expect(json.data).toBeUndefined();
+    });
+  });
+
+  describe("/api/agent/applications pagination & /batch PATCH", () => {
+    const authHeaders = { authorization: `Bearer ${TEST_AGENT_KEY}` };
+
+    it("GET supports limit + offset + compact pagination", async () => {
+      mockDb.applications.push(
+        { id: "p_1", userId: TEST_USER.id, company: "A", role: "R1", status: "APPLIED", deletedAt: null, archivedAt: null, createdAt: new Date() },
+        { id: "p_2", userId: TEST_USER.id, company: "B", role: "R2", status: "APPLIED", deletedAt: null, archivedAt: null, createdAt: new Date() }
+      );
+      const req = createNextRequest("/api/agent/applications?limit=1&offset=1&compact=true", {
+        headers: authHeaders,
+      });
+      const res = await getApplications(req);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.applications).toHaveLength(1);
+      expect(json.applications[0].id).toBe("p_2");
+    });
+
+    it("PATCH /batch updates multiple applications, logs statusHistory + notes, and reports missing IDs", async () => {
+      mockDb.applications.push(
+        { id: "b_1", userId: TEST_USER.id, company: "Alpha", role: "BE", status: "APPLIED", deletedAt: null, archivedAt: null },
+        { id: "b_2", userId: TEST_USER.id, company: "Beta", role: "FS", status: "APPLIED", deletedAt: null, archivedAt: null }
+      );
+
+      const req = createNextRequest("/api/agent/applications/batch", {
+        method: "PATCH",
+        headers: authHeaders,
+        body: {
+          updates: [
+            { id: "b_1", status: "REJECTED", addNote: "Email rejection" },
+            { id: "b_2", status: "INTERVIEW", addNote: "Phone invite" },
+            { id: "missing_id", status: "REJECTED" },
+          ],
+        },
+      });
+      const res = await patchApplicationsBatch(req);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      expect(json.updatedCount).toBe(2);
+      expect(json.updatedIds).toEqual(["b_1", "b_2"]);
+      expect(json.failed).toHaveLength(1);
+      expect(json.failed[0].id).toBe("missing_id");
+      expect(mockDb.statusHistory).toHaveLength(2);
+      expect(mockDb.notes).toHaveLength(2);
+    });
+
+    it("PATCH /batch rejects invalid empty payload with 400 and missing auth with 401", async () => {
+      const unauthReq = createNextRequest("/api/agent/applications/batch", {
+        method: "PATCH",
+        body: { updates: [{ id: "b_1", status: "REJECTED" }] },
+      });
+      expect((await patchApplicationsBatch(unauthReq)).status).toBe(401);
+
+      const badReq = createNextRequest("/api/agent/applications/batch", {
+        method: "PATCH",
+        headers: authHeaders,
+        body: { updates: [] },
+      });
+      expect((await patchApplicationsBatch(badReq)).status).toBe(400);
     });
   });
 

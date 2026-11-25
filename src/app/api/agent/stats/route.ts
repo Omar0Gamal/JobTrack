@@ -11,6 +11,11 @@ export async function GET(request: NextRequest) {
   }
   const { user } = auth.context;
 
+  const { searchParams } = request.nextUrl;
+  const compact = searchParams.get("compact") === "true";
+  const followUpLimitRaw = parseInt(searchParams.get("followUpLimit") || "15", 10);
+  const followUpLimit = Math.min(Math.max(1, isNaN(followUpLimitRaw) ? 15 : followUpLimitRaw), 100);
+
   const now = new Date();
   const userTz = user.timezone || "Africa/Cairo";
   const todayUserStr = getCalendarDateStringInTimezone(now, userTz);
@@ -18,30 +23,59 @@ export async function GET(request: NextRequest) {
   const todayCairoStr = getCalendarDateStringInTimezone(now, "Africa/Cairo");
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+  const activeApplicationsPromise = compact
+    ? prisma.application.findMany({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+          archivedAt: null,
+        },
+        select: {
+          id: true,
+          company: true,
+          role: true,
+          status: true,
+          appliedDate: true,
+          createdAt: true,
+          followUpDate: true,
+          jobUrl: true,
+          contacts: {
+            select: { name: true, email: true, linkedinUrl: true },
+            orderBy: { createdAt: "asc" },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      })
+    : prisma.application.findMany({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+          archivedAt: null,
+        },
+        include: {
+          contacts: {
+            orderBy: { createdAt: "asc" },
+          },
+          resumeVersion: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+  const resumeVersionsPromise = compact
+    ? Promise.resolve([])
+    : prisma.resumeVersion.findMany({
+        where: { userId: user.id },
+        include: {
+          _count: {
+            select: { applications: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
   const [activeApplications, resumeVersions] = await Promise.all([
-    prisma.application.findMany({
-      where: {
-        userId: user.id,
-        deletedAt: null,
-        archivedAt: null,
-      },
-      include: {
-        contacts: {
-          orderBy: { createdAt: "asc" },
-        },
-        resumeVersion: true,
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.resumeVersion.findMany({
-      where: { userId: user.id },
-      include: {
-        _count: {
-          select: { applications: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
+    activeApplicationsPromise,
+    resumeVersionsPromise,
   ]);
 
   const byStatus: Record<ApplicationStatus, number> = APPLICATION_STATUS_ORDER.reduce(
@@ -57,12 +91,10 @@ export async function GET(request: NextRequest) {
   const overdueFollowUps: typeof activeApplications = [];
 
   for (const app of activeApplications) {
-    // Status breakdown
     if (byStatus[app.status] !== undefined) {
       byStatus[app.status]++;
     }
 
-    // Applied today (UTC or Cairo or User timezone)
     const appDate = app.appliedDate ? new Date(app.appliedDate) : null;
     const createDate = app.createdAt ? new Date(app.createdAt) : null;
     const dates = [appDate, createDate].filter(Boolean) as Date[];
@@ -78,13 +110,11 @@ export async function GET(request: NextRequest) {
       appliedToday++;
     }
 
-    // Applied this week (last 7 days)
     const matchesThisWeek = dates.some((d) => d >= sevenDaysAgo);
     if (matchesThisWeek) {
       appliedThisWeek++;
     }
 
-    // Overdue follow-ups
     if (
       app.followUpDate &&
       app.status !== "OFFER" &&
@@ -93,6 +123,28 @@ export async function GET(request: NextRequest) {
     ) {
       overdueFollowUps.push(app);
     }
+  }
+
+  if (compact) {
+    return NextResponse.json({
+      ok: true,
+      compact: true,
+      totalActive: activeApplications.length,
+      appliedToday,
+      appliedThisWeek,
+      byStatus,
+      overdueFollowUpsTotal: overdueFollowUps.length,
+      overdueFollowUps: overdueFollowUps.slice(0, followUpLimit).map((a) => ({
+        id: a.id,
+        company: a.company,
+        role: a.role,
+        status: a.status,
+        appliedDate: a.appliedDate,
+        followUpDate: a.followUpDate,
+        jobUrl: a.jobUrl,
+        contacts: a.contacts ?? [],
+      })),
+    });
   }
 
   const resumes = resumeVersions.map((r) => ({

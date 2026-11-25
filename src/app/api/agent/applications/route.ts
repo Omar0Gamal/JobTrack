@@ -39,10 +39,13 @@ export async function GET(request: NextRequest) {
   const jobUrl = searchParams.get("jobUrl")?.trim();
   const status = searchParams.get("status")?.trim();
   const overdueOnly = searchParams.get("overdueOnly") === "true";
+  const compact = searchParams.get("compact") === "true";
   const limitParam = searchParams.get("limit");
+  const offsetParam = searchParams.get("offset");
   const limit = limitParam
     ? Math.min(Math.max(1, parseInt(limitParam, 10) || 50), 200)
     : 50;
+  const offset = offsetParam ? Math.max(0, parseInt(offsetParam, 10) || 0) : 0;
 
   const andConditions: Prisma.ApplicationWhereInput[] = [
     { userId: user.id, deletedAt: null },
@@ -89,12 +92,38 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const applications = await prisma.application.findMany({
-    where: { AND: andConditions },
-    orderBy: [{ createdAt: "desc" }],
-    take: limit,
-    include: agentApplicationInclude,
-  });
+  const applications = compact
+    ? await prisma.application.findMany({
+        where: { AND: andConditions },
+        orderBy: [{ createdAt: "desc" }],
+        skip: offset,
+        take: limit,
+        select: {
+          id: true,
+          company: true,
+          role: true,
+          status: true,
+          priority: true,
+          locationType: true,
+          location: true,
+          salaryMin: true,
+          salaryMax: true,
+          currency: true,
+          source: true,
+          jobUrl: true,
+          appliedDate: true,
+          followUpDate: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+    : await prisma.application.findMany({
+        where: { AND: andConditions },
+        orderBy: [{ createdAt: "desc" }],
+        skip: offset,
+        take: limit,
+        include: agentApplicationInclude,
+      });
 
   return NextResponse.json({
     ok: true,
